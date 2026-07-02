@@ -84,7 +84,3 @@ The system is designed to give bedridden or physically limited patients an easy 
 4. Wire up the hardware per the block diagram above. **Apply 3.3V to the AT25LC512 EEPROM.**
 5. On first run, uncomment the initial `Spi_eeprom_pagewrite()` call in `majormain.c` to write a default password into the EEPROM, flash and run once, then re-comment it for normal operation.
 
-## Author
-
-**Thota Gnaneshwar Vasu**
-B.Tech ECE | Embedded Systems Trainee, Vector India (HE6 Batch)

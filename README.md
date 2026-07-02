@@ -1,125 +1,90 @@
-# Touch-Based-Device-Control-System-For-Bedridden-Patients.
-Designed a password-protected touch-based embedded system using LPC2148 to help bedridden patients securely control household devices through an intuitive touch interface.
-# Features
-Secure Access
-User Friendly Control
-Non-Volatile Memory
-Required Components
-LPC2148 Board
-LCD(20x4)
-Keypad Matrix
-Resistive Touch Screen(1255)
-EEPROM(AT25LC512)
-Buzzer
-2 LED's
-Switch
-Tools
-Compiler: Keil uVision4
-Flashing Tools: Flash Magic
+# Touch-Based Device Control System for Bedridden Patients
 
-System Architecture and Component roles
-The system is built around the LPC2148, which acts as the intelligent hub for all peripheral interactions. The architecture is designed for reliability, ensuring that user commands are processed securely and executed predictably.
+An embedded systems project built on the **LPC2148 (ARM7TDMI-S)** microcontroller that lets bedridden patients control household devices — a fan, a light, and a buzzer for emergency alerts — through a resistive touch screen module, with a password-protected access system for security.
 
-The Central Controller: LPC2148
-The LPC2148 manages the entire execution flow. It handles:
-Peripheral Management: Managing the communication protocols (UART, SPI, GPIO) required to interface with external hardware.
-Logic Processing: Running the main control loop for device state management and executing the password-based security check.
-Interrupt Handling: Managing the EINT1 (External Interrupt) to allow for secure, real-time user-initiated password changes without interrupting standard device operation.
-Security & Data Management:
-Keypad Matrix: Acts as the primary Security Gateway. It provides a tactile interface for the user to authenticate before gaining access to the control interface, preventing accidental or unauthorized operation of home appliances.
-SPI EEPROM (AT25LC512): Serves as the Non-Volatile Storage. It holds the user's password securely. By utilizing the SPI (Serial Peripheral Interface) protocol, the microcontroller can quickly read or update this password, ensuring credentials persist even after a complete power loss.
-User Interface & Feedback:
-Resistive Touch Screen: Communicates with the controller via UART (Universal Asynchronous Receiver-Transmitter). This allows the system to receive precise (x, y, z) coordinate data, which the controller maps to specific appliance "buttons." This provides an intuitive way for patients with limited mobility to interact with their environment.
-LCD Module: Acts as the Visual Dashboard, providing immediate feedback to the patient. It displays system status (e.g., "Locked" vs. "Unlocked"), confirms password entries, and shows the current operational status of the fans and lights.
-Buzzer & LEDs: Provide Multisensory Feedback. * Buzzer: Offers an audible alert to notify the Doctor in case of Emergency. * LEDs: Offer a visual confirmation of device states (e.g., an LED glowing when the fan is active), which is essential for patients who may have hearing or visual impairments.
-Set-up Instructions
-Before using the Peripherals you must initialize the peripherals by calling InitLCD(),InitKPM(),InitUART0(),Init_SPI().
-Notes that you must include all the required headers like "LPC21xx.h","string.h" and user defined hearders like "lcd_defines.h","lcd.h","delay.h","types.h","SPI.h","spi_defines.h","defines.h","KPM.h","UART_INT.h","cfgportpinfunc.h","KPM_defines.h".
-"lcd_defines" contains the command values and the pin connections of LCD.
-"lcd.h" contains the function declarations of LCD.
-"delay.h" contains the function declarations of delay functions according to the time of delay required.
-"types.h" contains the type casted details of the existing data types.
-"SPI.h" contains the function declarations of the SPI related operations.
-"spi_defines.h" contains the commands and the pin connections of SPI.
-"defines.h" contains the macro expansions of Bit/Byte manipulation.
-"KPM.h" contains the function declarations of the Keypad related operations.
-"KPM_defines.h" contains the Pin connections of the Keypad.
-"UART_INT.h" contains the function declarations of the UART related operations.
-"cfgportpinfunc.h" contains the function declarations of the Pin configuration.
-Code Execution Flow
-START
-Initialize LCD, Keypad, UART, SPI (for EEPROM), and External Interrupts
-Read stored password from EEPROM
+## Overview
 
-LOOP (Main System):  
-    IF (m == 1): // Security Check  
-        Wait for valid password from Keypad   
-        IF (password is correct):  
-            Set m = 0, Display "Unlocked"
-               
-    Wait for input from Touch Screen (UART)   
-    Convert touch coordinates (x, y, z) to integers  
-    IF (Touch is in "Enable/Disable" region):  
-        Toggle 'enable' state  
+The system is designed to give bedridden or physically limited patients an easy way to operate essential devices around them without needing to physically reach for switches. A touch screen module (connected via UART) is divided into virtual button regions; touching a region toggles the corresponding device. All access is protected by a 4-digit password stored securely in an external SPI EEPROM, entered via a 4x4 matrix keypad and displayed on a 16x2 LCD.
 
-    IF (enable == 1):  
-        IF (Touch in "Buzzer" region):  
-            Toggle buzzer, Update hardware  
-        IF (Touch in "Fan" region):  
-            Set fan state (ON/OFF), Update hardware  
-        IF (Touch in "Light" region):  
-            Set light state (ON/OFF), Update hardware  
- 
-    Update LCD with current states (Touch, Buzzer, Fan, Light)  
-END LOOP  
-ISR (EINT1 - Password Change):
-Prompt user for current password
-IF (current password matches EEPROM):
-Loop:
-Prompt for new password
-Prompt to confirm new password
-IF (confirm matches new):
-Save new password to EEPROM
-Restart system logic
-BREAK Loop
-RETURN from ISR
+## Block Diagram
 
-Pin Connections
-Connect P0.1 to the Resistive TOuch Screen(1255) to receive the xyz co-ordinates.
-Connect P0.3 to the switch to raise an External interrupt because P0.3 supports the EINT1 for functionality 4 in LPC2148.
-Connect P0.4 to the SCLK pin of the EEPROM(AT25LC512).
-Connect P0.5 to the MISO(Master in-Slave out) of the EEPROM(AT25LC512).
-Connect P0.6 to the MOSI(Master out-Slave in) of the EEPROM(AT25LC512).
-Connect P0.7 to the CS(Chip Select) of the EEPROM(AT25LC512).
-Connect the pin P0.8 to P0.15 to the LCD.
-Connect the pin P0.17 to RS(Register Select) of LCD and P0.18 to EN(Enable) pin of LCD.
-Connect the pin P0.22 to the LED2 and consider as Light.
-Connect the pin P0.23 to the LED1 and consider as Fan.
-Connect the pin P0.25 to the Buzzer.
-Connect the VCC and GND pin of EEPROM(AT25LC512) to the 3.3V and GND respectively.
-Connect the VCC and GND pin of Resistive Touch Screen(1255) to the 3.3V and GND respectively.
-Connect the Keypad from the pins P1.16 to P1.23.
-How to Use
-System Power-Up:
-Upon connecting the power supply after Loading the code into the hardware, the system will initialize all peripherals.
-Authentication (Unlocking):
-The system requires authentication to prevent accidental usage.
-Enter your designated password using the Keypad Matrix.
-If the password is correct, the LCD will display "Unlocked," and you will gain access to the control interface.
-Operating Appliances:
-Once the system is unlocked, the Resistive Touch Screen becomes active.
-Enable: First, touch the "Enable" region to activate the control interface.
-Control: Select the desired region on the touch screen for the "Fan" or "Light".
-The system will toggle the state of the selected appliance (ON/OFF) and update the hardware. The corresponding LED will light up to provide visual confirmation of the device's current status.
-Changing Your Password:
-* If you need to update your security credentials, press the physical button connected to the External Interrupt (EINT1) pin p0.3.
-* The system will prompt you on the LCD to enter your current password for verification.
-* Once verified, you will be prompted to enter and confirm your new password.
-* The system will automatically save the new password to the EEPROM and return to the main control loop.
-Note: Always ensure the system is in the "Enabled" state before attempting to toggle appliances via the touch screen. If the system is "Disabled," touch inputs for appliances will be ignored for safety.
-Future Improvements
-Remote Monitoring & Connectivity: Integrate a Wi-Fi or Bluetooth module to allow caretakers to monitor appliance status or toggle devices remotely via a smartphone app.
-Intelligent Emergency Alerts: Present we are having an Emergency Buzzer,but we can improve that particular feature when pressed, triggers an audible alarm and sends a notification to a caregiver’s phone, ensuring rapid assistance when needed.
-Implementation of RTC-based Automation: The system is architected to support a real-time clock, which can be expanded to include automated daily routines, customizable appointment reminders, and time-stamped activity logging to enhance the patient's independence like Medication etc.
-Block Diagram
-Screenshot (3) ## Reference Output Video: https://github.com/user-attachments/assets/441dc235-6f77-425f-bc0e-de0daa45938b Output pics: 
+```
+                     ┌─────────────┐
+  4x4 MATRIX  ─────► │             │ ─────► LCD
+  KEYPAD             │             │
+                      │             │ ─────► DEVICE-1 (LED1 / Fan)
+  I.SW      ──[EINT]► │   LPC2148   │
+                      │             │ ─────► DEVICE-2 (LED2 / Light)
+                      │             │ ◄────► SPI ◄──► AT25LC512 EEPROM
+  TOUCH SCREEN───[UART0]►           │
+  MODULE               │             │ ─────► BUZZER
+                      └─────────────┘
+```
+> **Note:** Apply 3.3V as the operating voltage to the SPI-based EEPROM (AT25LC512).
+
+## Features
+
+- **Password-protected access** — 4-digit password entry via keypad, verified against a value stored in external EEPROM before granting control.
+- **Password change facility** — An external interrupt (EINT1), triggered by a switch, lets the user change the current password after verifying the existing one.
+- **Touch-based device control** — Touch screen coordinates (X, Y, Z) are parsed from a UART data stream and mapped to specific screen regions:
+  - Touch-enable/disable toggle
+  - Buzzer ON/OFF
+  - Fan (Device-1) ON/OFF
+  - Light (Device-2) ON/OFF
+- **Real-time status display** — LCD shows live ON/OFF status of the touch-enable, buzzer, fan, and light.
+- **Interrupt-driven UART reception** — Touch screen data is received via UART0 RX interrupt for reliable, non-blocking communication.
+- **Non-volatile password storage** — Password is stored and retrieved from an AT25LC512 SPI EEPROM so it persists across power cycles.
+
+## Hardware
+
+| Component | Interface | Purpose |
+|---|---|---|
+| LPC2148 (ARM7TDMI-S) | — | Main microcontroller |
+| 4x4 Matrix Keypad | GPIO (Port 1) | Password entry |
+| 16x2 LCD | GPIO (8-bit mode) | Status and prompt display |
+| Touch Screen Module | UART0 | Receives touch (X, Y, Z) coordinates |
+| AT25LC512 SPI EEPROM | SPI | Persistent password storage |
+| Push Switch | EINT1 | Triggers password change routine |
+| Buzzer | GPIO | Emergency/audible alert |
+| Device-1 (LED/Fan) | GPIO | Simulated fan control |
+| Device-2 (LED/Light) | GPIO | Simulated light control |
+
+## Repository Structure
+
+```
+├── majormain.c          # Main application logic, password flow, touch region handling, EINT1 ISR
+├── UART_INT.c/.h        # UART0 init and interrupt-driven receive of touch screen data
+├── SPI.c/.h              # SPI driver + AT25LC512 EEPROM read/write + password I/O via keypad
+├── spi_defines.h        # SPI pin/clock/command definitions
+├── KPM.c/.h              # 4x4 matrix keypad scanning and key lookup
+├── KPM_defines.h         # Keypad row/column pin definitions
+├── lcd.c/.h              # LCD driver (init, char/string/number display)
+├── lcd_defines.h         # LCD command and pin definitions
+├── cfgportpinfunc.c/.h  # Generic pin function/mux configuration utility
+├── delay.c/.h            # Microsecond/millisecond/second software delays
+├── defines.h             # Bit manipulation macros (SETBIT, CLRBIT, WRITEBYTE, etc.)
+├── types.h               # Typedefs for fixed-width types (u8, u16, u32, s8, s32, f32, f64)
+└── README.md
+```
+
+## How It Works
+
+1. **Startup** — The system initializes the LCD, keypad, UART0, and SPI, then reads the stored password from the EEPROM.
+2. **Authentication** — The user enters a 4-digit password via the keypad. Digits are masked (`*`) on the LCD, and a `+` key acts as backspace. Entry only proceeds once the correct password is entered.
+3. **Main control loop** — Once unlocked, the system waits for touch screen input over UART0. The interrupt handler buffers incoming characters into a string until a carriage return, then sets a flag indicating new coordinate data is ready.
+4. **Coordinate parsing** — The main loop extracts X, Y, Z values from the buffered string and checks which predefined screen region was touched, toggling the corresponding device.
+5. **Password change** — Pressing the external switch (EINT1) interrupts the main flow, asks for the current password, and if verified, lets the user set and confirm a new one, which is written back to the EEPROM.
+6. **Status feedback** — The LCD continuously reflects the current ON/OFF state of touch-enable, buzzer, fan, and light.
+
+## Getting Started
+
+1. Open the project in **Keil µVision** (or your preferred ARM7/LPC2148 toolchain).
+2. Ensure `LPC21xx.H` is available in your compiler's device header path.
+3. Build and flash to an LPC2148 board using a JTAG/ISP programmer (e.g., Flash Magic).
+4. Wire up the hardware per the block diagram above. **Apply 3.3V to the AT25LC512 EEPROM.**
+5. On first run, uncomment the initial `Spi_eeprom_pagewrite()` call in `majormain.c` to write a default password into the EEPROM, flash and run once, then re-comment it for normal operation.
+
+## Author
+
+**Thota Gnaneshwar Vasu**
+B.Tech ECE | Embedded Systems Trainee, Vector India (HE6 Batch)

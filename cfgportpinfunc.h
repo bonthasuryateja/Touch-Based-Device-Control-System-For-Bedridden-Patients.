@@ -1,0 +1,2 @@
+void cfgportpinfunc(int portno,int pinno,int fn);
+
